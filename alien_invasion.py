@@ -18,14 +18,12 @@ class AlienInvasion:
 
         self.ship = Ship(self)
 
-    
     def run_game(self):
         # main loop that runs the game and detects input
         while True:
             self._check_events()
             self.ship.update()
             self._update_screen()
-
     
     def _check_events(self):
         '''Respond to keypresses and mouse events'''
@@ -36,14 +34,15 @@ class AlienInvasion:
             elif event.type == pygame.KEYDOWN:
                 # change the ship speed if a key is held
                 if event.key == pygame.K_RIGHT:
-                    self.ship.speed = 1
+                    self.ship.moving_right = True
                 if event.key == pygame.K_LEFT:
-                    self.ship.speed = -1
-            elif event.type == pygame.KEYUP:
-                if (event.key == pygame.K_RIGHT) or (event.key == pygame.K_LEFT):
-                    self.ship.speed = 0
+                    self.ship.moving_left = True
+            elif event.type == pygame.KEYUP: # TODO: Make ship movement more smooth (Flags)
+                if event.key == pygame.K_RIGHT:
+                    self.ship.moving_right = False
+                if event.key == pygame.K_LEFT:
+                    self.ship.moving_left = False
             
-    
     def _update_screen(self):
         '''Updates the game screen'''
         self.screen.fill(self.settings.bg_color)

@@ -13,10 +13,21 @@ class Ship:
         self.rect = self.image.get_rect()
         # Start each new ship at the bottom center of the screen
         self.rect.midbottom = self.screen_rect.midbottom
-        self.speed = 0
+        self.movement_speed = 1.1
+        self.x = float(self.rect.x)
+        self.moving_right = False
+        self.moving_left = False
     
     def update(self):
-        self.rect.x += self.speed
+        if self.rect.right >= self.screen_rect.right and self.moving_right:
+            self.moving_right = False
+        elif self.rect.left <= self.screen_rect.left and self.moving_left:
+            self.moving_left = False
+        if self.moving_right == True:
+            self.x += self.movement_speed
+        if self.moving_left == True:
+            self.x -= self.movement_speed
+        self.rect.x = self.x
     
     def blitme(self):
         '''Draw the ship'''
