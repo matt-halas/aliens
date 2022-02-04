@@ -32,16 +32,23 @@ class AlienInvasion:
                 sys.exit()
             # Detects keypresses
             elif event.type == pygame.KEYDOWN:
-                # change the ship speed if a key is held
-                if event.key == pygame.K_RIGHT:
-                    self.ship.moving_right = True
-                if event.key == pygame.K_LEFT:
-                    self.ship.moving_left = True
-            elif event.type == pygame.KEYUP: # TODO: Make ship movement more smooth (Flags)
-                if event.key == pygame.K_RIGHT:
-                    self.ship.moving_right = False
-                if event.key == pygame.K_LEFT:
-                    self.ship.moving_left = False
+                self._check_keydown(event)
+            elif event.type == pygame.KEYUP:
+                self._check_keyup(event)
+    
+    def _check_keydown(self, event):
+        if event.key == pygame.K_RIGHT:
+            self.ship.moving_right = True
+        elif event.key == pygame.K_LEFT:
+            self.ship.moving_left = True
+        if event.key == pygame.K_q:
+            sys.exit()
+    
+    def _check_keyup(self, event):
+        if event.key == pygame.K_RIGHT:
+            self.ship.moving_right = False
+        elif event.key == pygame.K_LEFT:
+            self.ship.moving_left = False
             
     def _update_screen(self):
         '''Updates the game screen'''
