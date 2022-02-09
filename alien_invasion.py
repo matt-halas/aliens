@@ -1,4 +1,5 @@
 import sys
+from time import sleep
 
 import pygame
 
@@ -7,6 +8,8 @@ from ship import Ship
 from bullet import Bullet
 from alien import Alien
 from star import Star
+from lives import Lives
+from button import Button
 
 from numpy.random import random
 
@@ -22,19 +25,27 @@ class AlienInvasion:
         pygame.display.set_caption("Alien Invasion")
 
         self.ship = Ship(self)
+        self.lives = Lives(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self.stars = pygame.sprite.Group()
+        self.play_button = Button(self, 'Play')
 
         self._create_fleet()
         self._draw_stars()
+
+        self.game_active = True
 
     def run_game(self):
         # main loop that runs the game and detects input
         while True:
             self._check_events()
-            self.ship.update()
-            self._update_bullets()
+
+            if self.game_active:
+                self.ship.update()
+                self._update_aliens()
+                self._update_bullets()
+            
             self._update_screen()
     
     def _check_events(self):
@@ -69,6 +80,7 @@ class AlienInvasion:
         self.screen.fill(self.settings.bg_color)
         self.stars.draw(self.screen)
         self.ship.blitme()
+        self.lives.blitme()
         self.aliens.draw(self.screen)
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
@@ -85,18 +97,47 @@ class AlienInvasion:
         n_aliens_per_row = int(available_space_x // (alien.rect.width \
             * self.settings.alien_spacing))
         
-        for row in range(n_rows):    
+        for row in range(n_rows):
             for n in range(n_aliens_per_row):
                 self._create_alien(n, row)
     
     def _create_alien(self, alien_number, row):
         '''Creates an instance of alien'''
         alien = Alien(self)
-        alien.rect.x = (1 + alien_number) * alien.rect.width \
+        alien.x = (1 + alien_number) * alien.rect.width \
             * self.settings.alien_spacing
-        alien.rect.y = row * alien.rect.height * self.settings.alien_spacing
+        alien.y = row * alien.rect.height * self.settings.alien_spacing
+        alien.rect.x = alien.x
+        alien.rect.y = alien.y
         self.aliens.add(alien)
     
+    def _update_aliens(self):
+        BOUNCE = False
+        for alien in self.aliens:
+            if alien.rect.bottom > self.settings.screen_height:
+                self._reset(True)
+            if alien.rect.right > self.settings.screen_width or alien.rect.left < 0:
+                BOUNCE = True
+                continue
+        if BOUNCE:
+            for alien in self.aliens:
+                alien.speed = -alien.speed
+                alien.y += self.settings.fleet_drop_speed
+        self.aliens.update()
+        if pygame.sprite.spritecollideany(self.ship, self.aliens):
+            self._reset(True)
+    
+    def _reset(self, lost_life):
+        if lost_life:
+            self.lives.n_lives -= 1
+            if self.lives.n_lives == 0:
+                self.game_active = False
+        self.aliens.empty()
+        self.bullets.empty()
+        self._create_fleet()
+        self.ship.center_ship()
+        sleep(0.5)
+
     def _fire_bullet(self):
         '''creates new instance of bullet'''
         if len(self.bullets) < self.settings.bullets_allowed:
@@ -109,6 +150,9 @@ class AlienInvasion:
         for bullet in self.bullets.copy():
             if bullet.rect.y < 0:
                 self.bullets.remove(bullet)
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, False, True)
+        if not self.aliens:
+            self._reset(False)
         
     def _draw_stars(self):
         n_stars_x = self.settings.screen_width // self.settings.star_spacing
