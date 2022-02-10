@@ -1,10 +1,13 @@
 import pygame
+from settings import Settings
 
 class Ship:
     '''A class to manage the ship.'''
     def __init__(self, ai_game):
         self.screen = ai_game.screen
         self.screen_rect = ai_game.screen.get_rect()
+
+        self.settings = ai_game.settings
 
         # load the image and get its rect
         self.image = pygame.image.load('aliens-game\images\ship.bmp')
@@ -13,7 +16,6 @@ class Ship:
         self.rect = self.image.get_rect()
         # Start each new ship at the bottom center of the screen
         self.rect.midbottom = self.screen_rect.midbottom
-        self.movement_speed = 1.1
         self.x = float(self.rect.x)
         self.moving_right = False
         self.moving_left = False
@@ -24,9 +26,9 @@ class Ship:
         elif self.rect.left <= self.screen_rect.left and self.moving_left:
             self.moving_left = False
         if self.moving_right == True:
-            self.x += self.movement_speed
+            self.x += self.settings.ship_speed
         if self.moving_left == True:
-            self.x -= self.movement_speed
+            self.x -= self.settings.ship_speed
         self.rect.x = self.x
     
     def center_ship(self):

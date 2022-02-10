@@ -4,6 +4,7 @@ class Settings:
         self.screen_height = 800
         self.bg_color = (0, 0, 60)
 
+        self.ship_speed = 1
         self.bullet_speed = 1
         self.bullet_height = 30
         self.bullet_width = 300
@@ -17,3 +18,10 @@ class Settings:
         self.star_spacing = 100
 
         self.lives = 3
+
+        self.speedup_factor = 1.1
+    
+    def increase_speed(self):
+        self.ship_speed *= self.speedup_factor
+        self.bullet_speed *= self.speedup_factor
+        self.alien_speed *= self.speedup_factor
