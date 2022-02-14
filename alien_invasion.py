@@ -11,6 +11,7 @@ from alien import Alien
 from star import Star
 from lives import Lives
 from button import Button
+from scoreboard import Scoreboard
 
 from numpy.random import random
 
@@ -27,6 +28,9 @@ class AlienInvasion:
 
         self.ship = Ship(self)
         self.lives = Lives(self)
+        self.score = 0
+        self.level = 1
+        self.scoreboard = Scoreboard(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
         self.stars = pygame.sprite.Group()
@@ -89,6 +93,7 @@ class AlienInvasion:
         self.stars.draw(self.screen)
         self.ship.blitme()
         self.lives.blitme()
+        self.scoreboard.show_scoreboard()
         self.aliens.draw(self.screen)
         for bullet in self.bullets.sprites():
             bullet.draw_bullet()
@@ -155,6 +160,9 @@ class AlienInvasion:
     def _reset_game(self):
         self.game_active = False
         self.lives.n_lives = 3
+        self.scoreboard.level = 1
+        self.scoreboard.score = 0
+        self.settings.__init__()
         pygame.mouse.set_visible(True)
 
     def _fire_bullet(self):
@@ -169,10 +177,21 @@ class AlienInvasion:
         for bullet in self.bullets.copy():
             if bullet.rect.y < 0:
                 self.bullets.remove(bullet)
-        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, False, True)
+        collisions = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
+        if collisions:
+            for aliens in collisions.values():
+                self.scoreboard.score += self.settings.alien_score * len(aliens)
+            self.scoreboard.prep_score()
         if not self.aliens:
             self._reset_level(False)
             self.settings.increase_speed()
+            self.scoreboard.level += 1
+            self.scoreboard.prep_level()
+            self.settings.alien_score *= self.settings.score_multiplier
+    
+    def _check_bullet_alien_collisions(self):
+        '''respond to bullet-alien collisions'''
+
         
     def _draw_stars(self):
         n_stars_x = self.settings.screen_width // self.settings.star_spacing
